@@ -13,7 +13,7 @@ class FOSDEMBrowser {
         this.init();
     }
 
-            init() {
+                        init() {
         // Load events from embedded data (no server needed!)
         // Show loading state immediately
         const container = document.getElementById('eventsList');
@@ -64,6 +64,9 @@ class FOSDEMBrowser {
             setTimeout(parseData, 0);
         }
     }
+
+
+
 
 
 
@@ -213,6 +216,12 @@ class FOSDEMBrowser {
         const dayFilter = document.getElementById('dayFilter').value;
         const trackFilter = document.getElementById('trackFilter').value;
 
+        // Helper function to normalize day ID (remove trailing slash if present)
+        const normalizeDayId = (dayId) => {
+            if (!dayId) return '';
+            return dayId.toLowerCase().replace(/\/$/, ''); // Remove trailing slash
+        };
+
         // Filter events
         this.filteredEvents = this.events.filter(event => {
             // Favorites filter
@@ -221,8 +230,12 @@ class FOSDEMBrowser {
             }
 
             // Day filter
-            if (dayFilter !== 'all' && event.day?.id !== dayFilter) {
-                return false;
+            if (dayFilter !== 'all') {
+                const normalizedDayId = normalizeDayId(event.day?.id);
+                const normalizedFilter = normalizeDayId(dayFilter);
+                if (normalizedDayId !== normalizedFilter) {
+                    return false;
+                }
             }
 
             // Track filter
@@ -249,23 +262,37 @@ class FOSDEMBrowser {
 
         // Sort events
         const dayOrder = { 'saturday': 0, 'sunday': 1 };
+        
+        // Helper function to parse time string (HH:MM) to minutes for comparison
+        const parseTime = (timeStr) => {
+            if (!timeStr) return 9999; // Events without time go last
+            const parts = timeStr.split(':');
+            if (parts.length !== 2) return 9999;
+            const hours = parseInt(parts[0], 10);
+            const minutes = parseInt(parts[1], 10);
+            if (isNaN(hours) || isNaN(minutes)) return 9999;
+            return hours * 60 + minutes;
+        };
+        
         this.filteredEvents.sort((a, b) => {
             switch (sortBy) {
                 case 'time':
-                    // Sort by day first, then time
-                    const aDay = dayOrder[a.day?.id] ?? 2;
-                    const bDay = dayOrder[b.day?.id] ?? 2;
+                    // Sort by day first (Saturday before Sunday), then by time
+                    const aDayId = normalizeDayId(a.day?.id);
+                    const bDayId = normalizeDayId(b.day?.id);
+                    const aDay = dayOrder[aDayId] ?? 2;
+                    const bDay = dayOrder[bDayId] ?? 2;
                     if (aDay !== bDay) return aDay - bDay;
-                    return (a.startTime || '99:99').localeCompare(b.startTime || '99:99');
+                    // Same day: sort by time
+                    const aTime = parseTime(a.startTime);
+                    const bTime = parseTime(b.startTime);
+                    return aTime - bTime;
                 
                 case 'title':
                     return a.title.localeCompare(b.title);
                 
                 case 'room':
                     return (a.room?.name || 'ZZZ').localeCompare(b.room?.name || 'ZZZ');
-                
-                case 'day':
-                    return (dayOrder[a.day?.id] ?? 2) - (dayOrder[b.day?.id] ?? 2);
                 
                 case 'track':
                     return (a.track || 'ZZZ').localeCompare(b.track || 'ZZZ');

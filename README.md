@@ -9,7 +9,7 @@ A standalone, pure JavaScript application to browse FOSDEM 2026 events and mark 
 - ✅ Filter by track/theme (e.g., "AI Plumbers", "Retrocomputing", "Geospatial")
 - ✅ Mark/unmark events as favorites with one click
 - ✅ Filter to show only favorites
-- ✅ Sort by time, title, room, day, or track (default: by track)
+- ✅ Sort by time, title, room, or track (default: by track)
 - ✅ Filter by day (Saturday/Sunday)
 - ✅ Rich hover tooltips with:
   - Event abstracts/descriptions

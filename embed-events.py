@@ -191,7 +191,6 @@ html_template = """<!DOCTYPE html>
                     <option value="time">Sort by Time</option>
                     <option value="title">Sort by Title</option>
                     <option value="room">Sort by Room</option>
-                    <option value="day">Sort by Day</option>
                 </select>
                 
                 <select id="dayFilter">
